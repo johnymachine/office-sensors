@@ -1,0 +1,16 @@
+{
+    "timestamp": 1473671941,
+    "sensor": {
+        "id": 77797,
+        "original_time": 0,
+        "type_name": "Button",
+        "sensor_rssi": 200,
+        "ap_rssi": 200,
+        "volts": 2.95,
+        "sensor_state": 2,
+        "delayed": false,
+        "type_number": 11
+    },
+    "data": true,
+    "topic": ""
+}

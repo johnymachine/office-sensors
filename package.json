@@ -1,0 +1,30 @@
+{
+  "name": "office-sensors",
+  "version": "1.0.0",
+  "description": "Welcome to office sensors REST API!",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/johnymachine/office-sensors.git"
+  },
+  "keywords": [
+    "node",
+    "heroku",
+    "rest",
+    "api"
+  ],
+  "author": "Jan Gabriel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/johnymachine/office-sensors/issues"
+  },
+  "homepage": "https://github.com/johnymachine/office-sensors",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "mongoose": "^4.6.0"
+  }
+}
