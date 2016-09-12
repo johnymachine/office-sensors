@@ -1,2 +1,2 @@
-# pwajg
-Simple js client/server community forum
+# office-sensors
+Welcome to office sensors REST API!
