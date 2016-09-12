@@ -1,8 +1,8 @@
 'use strict'
 
 // env vars
-var uri = process.env.MONGOLAB_URI;
-var port = process.env.PORT;
+var uri = process.env.MONGODB_URI;
+var port = process.env.PORT || 8080;
 
 //required
 var express = require('express');
