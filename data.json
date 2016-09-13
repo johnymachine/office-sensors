@@ -11,6 +11,6 @@
         "delayed": false,
         "type_number": 11
     },
-    "data": true,
+    "data": {"value": true},
     "topic": ""
 }
