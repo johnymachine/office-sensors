@@ -9,6 +9,7 @@ var bodyParser = require('body-parser')
 var router = express.Router()
 var cloudgateRouter = require('./routes/cloudgate.js')
 var dataRouter = require('./routes/data.js')
+var deviceRouter = require('./routes/device.js')
 
 // mongoose
 var mongoose = require('mongoose')
@@ -48,6 +49,7 @@ router.all('/', function (req, res) {
 // bind routes
 router.use('/cloudgate/', cloudgateRouter)
 router.use('/data/', dataRouter)
+router.use('/device/', deviceRouter)
 
 // bind main router and make prefix /apiv1
 app.use('/apiv1', router)
