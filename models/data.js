@@ -16,9 +16,7 @@ var dataSchema = new Schema({
   }
 }, {
   collection: 'data',
-  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
-  unique: true,
-  dropDups: true
+  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 })
 var Data = mongoose.model('Data', dataSchema)
 module.exports = Data

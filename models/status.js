@@ -19,9 +19,7 @@ var statusSchema = new Schema({
   delayed: Boolean
 }, {
   collection: 'status',
-  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
-  unique: true,
-  dropDups: true
+  timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 })
 var Status = mongoose.model('Status', statusSchema)
 module.exports = Status
