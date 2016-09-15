@@ -10,6 +10,7 @@ var router = express.Router()
 var cloudgateRouter = require('./routes/cloudgate.js')
 var dataRouter = require('./routes/data.js')
 var deviceRouter = require('./routes/device.js')
+var statusRouter = require('./routes/status.js')
 
 // mongoose
 var mongoose = require('mongoose')
@@ -50,6 +51,10 @@ router.all('/', function (req, res) {
 router.use('/cloudgate/', cloudgateRouter)
 router.use('/data/', dataRouter)
 router.use('/device/', deviceRouter)
+router.use('/status/', statusRouter)
+
+// serve static files from
+app.use('/', express.static('public'))
 
 // bind main router and make prefix /apiv1
 app.use('/apiv1', router)
@@ -60,7 +65,7 @@ mongoose.connect(app.get('mongodb_uri'), function (err, res) {
     console.log('Error connecting to Mongodb: ' + err)
   } else {
     console.log('Successfully connected to Mongodb.')
-        // start server
+    // start server
     app.listen(app.get('port'))
     console.log('Server is running on port: ' + app.get('port'))
   }

@@ -1,0 +1,112 @@
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Angular Material style sheet -->
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
+<body ng-app="OfficeSensors" layout="column" ng-controller="AppController as ac" ng-cloak>
+    <md-toolbar>
+        <h1 class="md-toolbar-tools">Office Sensors</h1>
+    </md-toolbar>
+    <div class="container" layout="row" flex>
+        <md-sidenav class="md-sidenav-left" md-component-id="left" md-disable-backdrop md-whiteframe="4" md-is-locked-open="true"
+            flex>
+            <md-list>
+                <md-list-item ng-repeat="device in devices" ng-click="setCurrent(device)">
+                    {{device.sensor_id}} - ({{device.type_name}})
+                </md-list-item>
+            </md-list>
+        </md-sidenav>
+        <md-content style="padding:5px 40px;" flex>
+            <h1>{{currentDevice.my_name}} ({{currentDevice.sensor_id}})</h1>
+            <p>{{currentDevice.my_description}}</p>
+            <md-icon><i class="material-icons">battery_std</i></md-icon>{{currentStatus.volts}}
+            <md-icon><i class="material-icons">settings_remote</i></md-icon>{{currentStatus.sensor_rssi}}
+            <md-icon><i class="material-icons">router</i></md-icon>{{currentStatus.ap_rssi}}
+            <iframe width="100%" height="600" src="{{plotUrl | trustAsResourceUrl}}">
+                <p>Your browser does not support iframes.</p>
+            </iframe>
+        </md-content>
+    </div>
+
+    <!-- Angular Material requires Angular.js Libraries -->
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
+
+    <!-- Angular Material Library -->
+    <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
+
+    <!-- Your application bootstrap  -->
+    <script type="text/javascript">    
+        var app = angular.module('OfficeSensors', ['ngMaterial'])
+        .filter('trustAsResourceUrl', ['$sce', function ($sce) {
+            return function (val) {
+            return $sce.trustAsResourceUrl(val)
+            }
+        }])
+        .factory('Rest', function ($http) {
+            return {
+            getDevices: function () {
+                return $http.get('http://office-sensors.herokuapp.com/apiv1/device', {})
+            },
+            getStatus: function (sensor_id) {
+                return $http.get('http://localhost:8080/apiv1/status?sensor_id=' + sensor_id + '&order=desc&limit=1')
+            },
+            updateTodo: function (data) {
+                return $http.post('http://172.16.24.236/Thingworx/Things/TodoStream/Services/updateTodo', data)
+            },
+            deleteTodo: function (data) {
+                return $http.post('http://172.16.24.236/Thingworx/Things/TodoStream/Services/deleteTodo', data)
+            },
+            deleteAllTodos: function () {
+                return $http.post('http://172.16.24.236/Thingworx/Things/TodoStream/Services/deleteAllTodos', {})
+            }
+            }
+        })
+        .controller('AppController', function ($scope, Rest) {
+            $scope.devices = []
+            $scope.currentDevice = {}
+            $scope.currentStatus = {}
+            $scope.plotUrl = ''
+            $scope.refreshDevices = function () {
+            Rest.getDevices()
+                .then(function successCallback (response) {
+                // this callback will be called asynchronously
+                // when the response is available
+                $scope.devices = response.data
+                $scope.setCurrent($scope.devices[0])
+                }, function errorCallback (response) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+                console.log(response)
+                })
+            }
+            $scope.getCurrentStatus = function (sensor_id) {
+            Rest.getStatus(sensor_id)
+                .then(function successCallback (response) {
+                // this callback will be called asynchronously
+                // when the response is available
+                $scope.currentStatus = response.data[0]
+                $scope.plotUrl = 'http://172.16.24.93:8000/plot/' + $scope.currentDevice.sensor_id
+                }, function errorCallback (response) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+                console.log(response)
+                })
+            }
+            $scope.setCurrent = function (device) {
+                $scope.currentDevice = device
+                $scope.getCurrentStatus(device.sensor_id)
+            }
+            $scope.refreshDevices()
+        })
+  </script>
+
+</body>
+
+</html>
