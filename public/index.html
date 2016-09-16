@@ -67,10 +67,10 @@
                 return $http.get('http://office-sensors.herokuapp.com/apiv1/device', {})
             },
             getStatus: function (sensor_id) {
-                return $http.get('http://localhost:8080/apiv1/status?sensor_id=' + sensor_id + '&order=desc&limit=1')
+                return $http.get('http://office-sensors.herokuapp.com/apiv1/status?sensor_id=' + sensor_id + '&order=desc&limit=1')
             },
             getData: function (sensor_id) {
-                return $http.get('http://localhost:8080/apiv1/data?sensor_id=' + sensor_id + '&limit=200&skip=50' )
+                return $http.get('http://office-sensors.herokuapp.com/apiv1/data?sensor_id=' + sensor_id + '&limit=200&skip=50' )
             },
             updateTodo: function (data) {
                 return $http.post('http://172.16.24.236/Thingworx/Things/TodoStream/Services/updateTodo', data)
