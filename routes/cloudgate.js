@@ -6,11 +6,11 @@ var Data = require('../models/data.js')
 
 // application router for /sensors/
 cloudgateRouter.route('/')
-  // midleware for all /sensors/ routes
+  // all /sensors/ routes
   .all(function (req, res, next) {
     return next()
   })
-  // parse new heartbeat
+  // parse new heartbeat request
   .post(function (req, res, next) {
     var sensorId = req.body.sensor.id
     var timestamp = new Date(req.body.timestamp * 1000)

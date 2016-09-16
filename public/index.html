@@ -4,6 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Angular Material style sheet -->
     <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/line-chart/2.0.28/LineChart.min.css"/>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 
@@ -26,6 +27,8 @@
             <md-icon><i class="material-icons">battery_std</i></md-icon>{{currentStatus.volts}}
             <md-icon><i class="material-icons">settings_remote</i></md-icon>{{currentStatus.sensor_rssi}}
             <md-icon><i class="material-icons">router</i></md-icon>{{currentStatus.ap_rssi}}
+            <canvas id="line" class="chart chart-line" chart-data="chartjs.data" chart-labels="chartjs.labels" chart-click="onClick"></canvas>
+            <linechart data="data" options="options"></linechart>
             <iframe width="100%" height="600" src="{{plotUrl | trustAsResourceUrl}}">
                 <p>Your browser does not support iframes.</p>
             </iframe>
@@ -38,12 +41,21 @@
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
 
+
     <!-- Angular Material Library -->
     <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0/angular-material.min.js"></script>
 
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.0.2/Chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-chart.js/1.0.2/angular-chart.js"></script>
+
+    <!-- D3.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/line-chart/2.0.28/LineChart.min.js"></script>
+
     <!-- Your application bootstrap  -->
     <script type="text/javascript">    
-        var app = angular.module('OfficeSensors', ['ngMaterial'])
+        var app = angular.module('OfficeSensors', ['ngMaterial', 'chart.js', 'n3-line-chart'])
         .filter('trustAsResourceUrl', ['$sce', function ($sce) {
             return function (val) {
             return $sce.trustAsResourceUrl(val)
@@ -57,6 +69,9 @@
             getStatus: function (sensor_id) {
                 return $http.get('http://localhost:8080/apiv1/status?sensor_id=' + sensor_id + '&order=desc&limit=1')
             },
+            getData: function (sensor_id) {
+                return $http.get('http://localhost:8080/apiv1/data?sensor_id=' + sensor_id + '&limit=200&skip=50' )
+            },
             updateTodo: function (data) {
                 return $http.post('http://172.16.24.236/Thingworx/Things/TodoStream/Services/updateTodo', data)
             },
@@ -69,6 +84,95 @@
             }
         })
         .controller('AppController', function ($scope, Rest) {
+            $scope.options = {
+            margin: {
+                top: 20
+            },
+            series: [
+                {
+                axis: "y",
+                dataset: "timed",
+                key: "val_0",
+                label: "A line series",
+                color: "hsla(88, 48%, 48%, 1)",
+                type: [
+                    "line"
+                ],
+                id: "mySeries0"
+                }
+            ],
+            axes: {
+                x: {
+                key: "x",
+                type: "date"
+                }
+            }
+            };
+            $scope.data = {
+                timed: [
+                {
+                x: "2016-08-16T09:22:31.329Z",
+                val_0: 0,
+                val_1: 0,
+                val_2: 0,
+                val_3: 0
+                },
+                {
+                x: "2016-08-17T09:22:31.329Z",
+                val_0: 0.993,
+                val_1: 3.894,
+                val_2: 8.47,
+                val_3: 14.347
+                },
+                {
+                x: "2016-08-18T09:22:31.329Z",
+                val_0: 1.947,
+                val_1: 7.174,
+                val_2: 13.981,
+                val_3: 19.991
+                },
+                {
+                x: "2016-08-19T09:22:31.329Z",
+                val_0: 2.823,
+                val_1: 9.32,
+                val_2: 14.608,
+                val_3: 13.509
+                },
+                {
+                x: "2016-08-20T09:22:31.329Z",
+                val_0: 3.587,
+                val_1: 9.996,
+                val_2: 10.132,
+                val_3: -1.167
+                },
+                {
+                x: "2016-08-21T09:22:31.329Z",
+                val_0: 4.207,
+                val_1: 9.093,
+                val_2: 2.117,
+                val_3: -15.136
+                },
+                {
+                x: "2016-08-22T09:22:31.329Z",
+                val_0: 4.66,
+                val_1: 6.755,
+                val_2: -6.638,
+                val_3: -19.923
+                }]
+            }
+            $scope.data.timed.forEach(function(row) {
+                row.x = new Date(row.x);
+            });
+            $scope.chartjs = {}
+            $scope.chartjs.labels = [];
+            $scope.chartjs.data = [
+                []
+            ];
+            $scope.d3 = {}
+            $scope.d3.labels = [];
+            $scope.d3.data = [
+                []
+            ];
             $scope.devices = []
             $scope.currentDevice = {}
             $scope.currentStatus = {}
@@ -99,9 +203,37 @@
                 console.log(response)
                 })
             }
+            $scope.getCurrentData = function (sensor_id) {
+            Rest.getData(sensor_id)
+                .then(function successCallback (response) {
+                var labels = []
+                var data = []
+                var series = {}
+                for (let index = 0; index < response.data.length; ++index) {
+                    labels.push((new Date(response.data[index].timestamp)).toLocaleString())
+                    for (let key in response.data[index].data){
+                        if (!series[key]) series[key] = []
+                        series[key].push(response.data[index].data[key])
+                    }
+                }
+                for (let key in series){
+                    data.push(series[key])
+                }
+                console.log(data)
+                // this callback will be called asynchronously
+                // when the response is available
+                $scope.chartjs.labels = labels
+                $scope.chartjs.data = data
+                }, function errorCallback (response) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+                console.log(response)
+                })
+            }
             $scope.setCurrent = function (device) {
                 $scope.currentDevice = device
                 $scope.getCurrentStatus(device.sensor_id)
+                $scope.getCurrentData(device.sensor_id)
             }
             $scope.refreshDevices()
         })

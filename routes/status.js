@@ -10,14 +10,17 @@ statusRouter.route('/')
   })
   // get sensor status
   .get(function (req, res, next) {
-    var sensorId = req.query.sensor_id || ''
+    var query = {}
+    if (req.query.sensor_id) query.sensor_id = req.query.sensor_id
     var skip = req.query.skip || 0
+    var sortby = req.query.sortby || 'timestamp'
     var order = req.query.order || 'asc'
-    var limit = req.query.limit || 100
+    var limit = req.query.limit || 50
+    var sort = {[sortby]: order}
     Status
-      .find({ 'sensor_id': sensorId })
+      .find(query)
       .skip(skip)
-      .sort({ 'timestamp': order })
+      .sort(sort)
       .limit(limit)
       .exec(function (err, status) {
         if (err) {
